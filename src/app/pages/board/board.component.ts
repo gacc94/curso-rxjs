@@ -1,5 +1,17 @@
 import {Component, ElementRef, OnInit, Renderer2, ViewChild} from '@angular/core';
-import {fromEvent, map, mergeAll, Observable, Observer, tap} from "rxjs";
+import {
+    debounceTime,
+    fromEvent,
+    map,
+    merge,
+    mergeAll,
+    Observable,
+    Observer,
+    Subscription,
+    takeUntil,
+    tap,
+    throttleTime
+} from "rxjs";
 
 @Component({
     selector: 'app-board',
@@ -9,20 +21,32 @@ import {fromEvent, map, mergeAll, Observable, Observer, tap} from "rxjs";
 })
 export class BoardComponent implements OnInit{
     @ViewChild('reactiveCanvas',{static:true}) canvas!: ElementRef;
-    onMouseDown$: Observable<Event>    = fromEvent(document, 'mousedown');
-    onMouseMove$: Observable<Event>    = fromEvent(document, 'mousemove');
-    onMouseUp$:   Observable<Event>    = fromEvent(document, 'mouseup');
+    @ViewChild('restart',{static: true}) restart!:ElementRef;
+
+    onMouseDown$:   Observable<Event>   = fromEvent(document, 'mousedown');
+    onMouseMove$:   Observable<Event>   = fromEvent(document, 'mousemove');
+    onMouseUp$:     Observable<Event>   = fromEvent(document, 'mouseup');
+    onLoadWindow$:   Observable<Event>  = fromEvent(window, 'load');
+
+
     cursorPosition = {x:0, y:0};
+
     constructor(
        private _render: Renderer2
     ) {}
 
     ngOnInit(): void {
         const canvas = this.canvas?.nativeElement;
+        const restart = this.restart?.nativeElement;
         // this._render.setStyle(canvas,'background','red');
         const canvasContext = this.canvas?.nativeElement.getContext('2d');
+        const onRestartClick$: Observable<Event>  = fromEvent(this.restart?.nativeElement, 'click');
+        const restartWhiteBoard$: Observable<Event> = merge(this.onLoadWindow$, onRestartClick$)
+
 
         canvasContext.lineWidth = 8
+        canvasContext.lineJoin = 'round';
+        canvasContext.lineCap = 'round';
         canvasContext.strokeStyle = 'white';
 
         const updateCursorPosition = (evt: Event) => {
@@ -50,16 +74,31 @@ export class BoardComponent implements OnInit{
         //         console.log(this.cursorPosition);
         //
         //     })
-        this.onMouseDown$
+        const startPaint$ = this.onMouseDown$
             .pipe(
-                map(()=>this.onMouseMove$),
+                map(()=> {
+                    return this.onMouseMove$
+                        .pipe(
+                            debounceTime(3),
+                            takeUntil(this.onMouseUp$)
+                        )
+                }),
                 mergeAll(),
             )
-            .subscribe({
+        let startPaintSubscription:Subscription = startPaint$.subscribe({
                 next: paintStroke
             });
 
         this.onMouseDown$.subscribe(updateCursorPosition);
+        restartWhiteBoard$.subscribe({
+            next: (value: Event) => {
+                startPaintSubscription.unsubscribe();
+                canvasContext.clearRect(0,0,canvas.with,canvas.height);
+                startPaintSubscription = startPaint$.subscribe({
+                    next: paintStroke
+                });
+            }
+        })
 
     }
 }

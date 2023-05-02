@@ -11,6 +11,10 @@ import { BoardComponent } from './pages/board/board.component';
 import { DistinctOthersComponent } from './pages/distinct-others/distinct-others.component';
 import { TimesComponent } from './pages/times/times.component';
 import { MergeComponent } from './pages/merge/merge.component';
+import { TakeComponent } from './pages/take/take.component';
+import { PluckComponent } from './pages/pluck/pluck.component';
+import { StartWithEndWithComponent } from './pages/start-with-end-with/start-with-end-with.component';
+import { ErrorsComponent } from './pages/errors/errors.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +26,11 @@ import { MergeComponent } from './pages/merge/merge.component';
     BoardComponent,
     DistinctOthersComponent,
     TimesComponent,
-    MergeComponent
+    MergeComponent,
+    TakeComponent,
+    PluckComponent,
+    StartWithEndWithComponent,
+    ErrorsComponent
   ],
   imports: [
     BrowserModule,
