@@ -30,4 +30,5 @@ node v18.16.0
 ## Recursos
 
 1. RxJS Marbles -  enlace: https://rxmarbles.com/
+2. RxJS Documentation - DEV  -  enlace: https://rxjs.dev/api
 

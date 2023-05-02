@@ -51,7 +51,7 @@ export class AjaxComponent {
             )
             .subscribe({
                 next: (value) =>{
-                    console.log(value.data.message);
+                    console.log(value.data);
                 }
             });
 
