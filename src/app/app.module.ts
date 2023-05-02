@@ -15,6 +15,8 @@ import { TakeComponent } from './pages/take/take.component';
 import { PluckComponent } from './pages/pluck/pluck.component';
 import { StartWithEndWithComponent } from './pages/start-with-end-with/start-with-end-with.component';
 import { ErrorsComponent } from './pages/errors/errors.component';
+import { AjaxComponent } from './pages/ajax/ajax.component';
+import { FromFetchComponent } from './pages/from-fetch/from-fetch.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +32,9 @@ import { ErrorsComponent } from './pages/errors/errors.component';
     TakeComponent,
     PluckComponent,
     StartWithEndWithComponent,
-    ErrorsComponent
+    ErrorsComponent,
+    AjaxComponent,
+    FromFetchComponent
   ],
   imports: [
     BrowserModule,
