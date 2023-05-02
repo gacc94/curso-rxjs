@@ -1,5 +1,5 @@
 import {Component, ElementRef, OnInit, Renderer2, ViewChild} from '@angular/core';
-import {fromEvent, Observable, Observer, tap} from "rxjs";
+import {fromEvent, map, mergeAll, Observable, Observer, tap} from "rxjs";
 
 @Component({
     selector: 'app-board',
@@ -13,7 +13,6 @@ export class BoardComponent implements OnInit{
     onMouseMove$: Observable<Event>    = fromEvent(document, 'mousemove');
     onMouseUp$:   Observable<Event>    = fromEvent(document, 'mouseup');
     cursorPosition = {x:0, y:0};
-
     constructor(
        private _render: Renderer2
     ) {}
@@ -26,24 +25,41 @@ export class BoardComponent implements OnInit{
         canvasContext.lineWidth = 8
         canvasContext.strokeStyle = 'white';
 
-        canvasContext.beginPath();
-        canvasContext.moveTo(100,200);
-        canvasContext.lineTo(200,100);
-        canvasContext.stroke();
-        canvasContext.closePath();
+        const updateCursorPosition = (evt: Event) => {
+            this.cursorPosition.x = (<MouseEvent>evt).clientX - canvas.offsetLeft;
+            this.cursorPosition.y = (<MouseEvent>evt).clientY - canvas.offsetTop;
+        }
 
-        this.onMouseMove$
+        const paintStroke = (evt: Event) => {
+            canvasContext.beginPath();
+            canvasContext.moveTo(this.cursorPosition.x, this.cursorPosition.y);
+            updateCursorPosition(evt);
+            canvasContext.lineTo(this.cursorPosition.x, this.cursorPosition.y);
+            canvasContext.stroke();
+            canvasContext.closePath();
+        }
+
+        // this.onMouseMove$
+        //     .pipe(
+        //         // tap((val: Event) => console.log(val))
+        //     )
+        //     .subscribe((event: Event): void => {
+        //         const evt: MouseEvent = <MouseEvent>event
+        //         this.cursorPosition.x = evt.clientX - canvas.offsetLeft;
+        //         this.cursorPosition.y = evt.clientY - canvas.offsetTop;
+        //         console.log(this.cursorPosition);
+        //
+        //     })
+        this.onMouseDown$
             .pipe(
-                // tap((val: Event) => console.log(val))
+                map(()=>this.onMouseMove$),
+                mergeAll(),
             )
-            .subscribe((event: Event): void => {
-                const evt: MouseEvent = <MouseEvent>event
-                this.cursorPosition.x = evt.clientX - canvas.offsetLeft;
-                this.cursorPosition.y = evt.clientY - canvas.offsetTop;
-                console.log(this.cursorPosition);
+            .subscribe({
+                next: paintStroke
+            });
 
-            })
-
+        this.onMouseDown$.subscribe(updateCursorPosition);
 
     }
 }

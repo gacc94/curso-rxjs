@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {from, fromEvent, interval, map, mergeAll, mergeMap, mergeWith, Observable, pipe} from "rxjs";
+import {from, fromEvent, interval, map, mergeAll, mergeMap, mergeWith, Observable, pipe, switchMap} from "rxjs";
 
 @Component({
     selector: 'app-merge',
@@ -11,9 +11,12 @@ export class MergeComponent implements OnInit{
 
     onClick$        = fromEvent(document, 'click');
     onMouseMove$    = fromEvent(document, 'mousemove');
-    highOrder$:any;
+    highOrder$ = new Observable((subscriber) => {
+        subscriber.next(2);
+    });
     firstOrder$:any;
     letters$ = from(['A','B','C','D']);
+    myObservable!:Observable<any>;
 
     ngOnInit(): void {
         // this.onClick$
@@ -37,15 +40,17 @@ export class MergeComponent implements OnInit{
         //             console.log(value)
         //         }
         //     });
-        this.letters$
+        this.myObservable = this.letters$
             .pipe(
-                mergeMap((val)=> `${val}+B`),
+                switchMap((val)=> `${val}+B`),
             )
-            .subscribe({
-                next: (value) => {
-                    console.log(value);
-                }
-            })
-
+            // .subscribe({
+            //     next: (value) => {
+            //         console.log(value);
+            //     }
+            // })
+        this.myObservable.subscribe(value => {
+            console.log(value)
+        });
     }
 }
